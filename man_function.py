@@ -1,6 +1,5 @@
 import streamlit as st
 from sat_solver import solve_2sat_from_rules, find_feasible_configurations, read_config_from_file
-from itertools import combinations
 
 def check_feasibility(selected_features, requirements, conflicts):
     """Перевіряє, чи можлива обрана конфігурація"""
@@ -783,3 +782,4 @@ with st.sidebar:
     5. Перегляньте результат
     6. При необхідності скоригуйте вибір
     """)
+
