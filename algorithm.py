@@ -1,5 +1,5 @@
 """ algorims and reading of the inout file"""
-def cnf(input_file)-> dict:
+def cnf_file(input_file)-> dict[str, str]:
     """
     Reads rules from a file and converts them to conjunctive normal form (CNF).
 
@@ -41,11 +41,52 @@ def cnf(input_file)-> dict:
                 if key in result_cnf:
                     result_cnf[key].append(value)
                 else:
-                    if value == '[]':
-                        result_cnf.setdefault(key, key)
                     result_cnf.setdefault(key, [value])
 
     return result_cnf
+
+def cnf_inputs(requirements, conflicts, all_components)-> dict[str, str]:
+    """
+    Reads rules from user inputs and converts them to conjunctive normal form (CNF).
+
+    Conversion logic:
+    - ‘A REQUIRES B’ (A -> B) is converted to ‘{'A': ['B']}’.
+    - ‘A CONFLICTS B’ (A xor B) is converted to ‘{'A': ['not B']}’.
+
+    Returns:
+        dict: Dictionary containing constraint rules grouped by variables
+    """
+    result_cnf = {}
+    appropriation = {}
+    for idx, comp in enumerate(all_components):
+        appropriation[comp] = chr(97 + idx)
+
+    for a, b in requirements:
+        key = appropriation[a]
+        value = appropriation[b]
+
+        if key in result_cnf:
+            result_cnf[key].append(value)
+        else:
+            result_cnf.setdefault(key, [value])
+
+    for a, b in conflicts:
+        key_a = appropriation[a]
+        key_b = appropriation[b]
+
+        if key_a in result_cnf:
+            result_cnf[key_a].append(f'not {key_b}')
+        else:
+            result_cnf.setdefault(key_a, [f'not {key_b}'])
+
+        if key_b in result_cnf:
+            result_cnf[key_b].append(f'not {key_a}')
+        else:
+            result_cnf.setdefault(key_b, [f'not {key_a}'])
+
+    return result_cnf, appropriation
+
+
 
 def build_graph_from_cnf(cnf_dict):
     graph = {}
@@ -121,7 +162,3 @@ def solve_2sat(cnf_dict):
 
     return assignment
 
-
-if __name__ == '__main__':
-    print(f'{cnf('phone.txt')} for phone')
-    print(f'{cnf('cofee.txt')} for coffee')
